@@ -6,22 +6,22 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kodlamaio.hrms.business.abstracts.JobTitleService;
+import kodlamaio.hrms.business.abstracts.JobPositionService;
 import kodlamaio.hrms.core.ultilities.results.DataResult;
 import kodlamaio.hrms.core.ultilities.results.ErrorResult;
 import kodlamaio.hrms.core.ultilities.results.Result;
 import kodlamaio.hrms.core.ultilities.results.SuccessDataResult;
 import kodlamaio.hrms.core.ultilities.results.SuccessResult;
-import kodlamaio.hrms.dataAccess.abstracts.JobTitleDao;
+import kodlamaio.hrms.dataAccess.abstracts.JobPositionDao;
 import kodlamaio.hrms.entities.concrates.JobPosition;
 
 @Service
-public class JobTitleManager implements JobTitleService {
+public class JobPositionManager implements JobPositionService {
 
-	private JobTitleDao jobTitleDao;
+	private JobPositionDao jobTitleDao;
 
 	@Autowired
-	public JobTitleManager(JobTitleDao jobTitleDao) {
+	public JobPositionManager(JobPositionDao jobTitleDao) {
 		super();
 		this.jobTitleDao = jobTitleDao;
 	}
@@ -34,7 +34,7 @@ public class JobTitleManager implements JobTitleService {
 	@Override
 	public Result add(JobPosition jobTitle) {
 		
-		if(jobTitleDao.getByName(jobTitle.getName())!=null) {
+		if(jobTitleDao.getByPositionName(jobTitle.getPositionName())!=null) {
 			return new ErrorResult("Böyle bir is pozisyonu zaten var.");
 		}
 		
@@ -60,8 +60,8 @@ public class JobTitleManager implements JobTitleService {
 	}
 
 	@Override
-	public DataResult<JobPosition> getByName(String name) {
-		return new SuccessDataResult<JobPosition>(jobTitleDao.getByName(name));
+	public DataResult<JobPosition> getByPositionName(String name) {
+		return new SuccessDataResult<JobPosition>(jobTitleDao.getByPositionName(name));
 	}
 
 }

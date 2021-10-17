@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import kodlamaio.hrms.business.abstracts.JobTitleService;
+import kodlamaio.hrms.business.abstracts.JobPositionService;
 import kodlamaio.hrms.core.ultilities.results.DataResult;
 import kodlamaio.hrms.core.ultilities.results.Result;
 import kodlamaio.hrms.entities.concrates.JobPosition;
 
 @RestController
 @RequestMapping("api/jobtitles")
-public class JobTitlesController {
+public class JobPositionsController {
 
-	private JobTitleService jobTitleService;
+	private JobPositionService jobTitleService;
 
 	@Autowired
-	public JobTitlesController(JobTitleService jobTitleService) {
+	public JobPositionsController(JobPositionService jobTitleService) {
 		super();
 		this.jobTitleService = jobTitleService;
 	}
@@ -44,15 +44,15 @@ public class JobTitlesController {
 
 	}
 
-	@GetMapping("getbyid/{id}")
-	public DataResult<Optional<JobPosition>> getById(@PathVariable int id) {
+	@GetMapping("/getbyid")
+	public DataResult<Optional<JobPosition>> getById(@RequestParam int id) {
 		return jobTitleService.getById(id);
 
 	}
 
-	@GetMapping("getbyname")
-	public DataResult<JobPosition> getByName(@RequestParam String name) {
-		return jobTitleService.getByName(name);
+	@GetMapping("getbypositionname")
+	public DataResult<JobPosition> getByPositionName(@RequestParam String name) {
+		return jobTitleService.getByPositionName(name);
 
 	}
 
@@ -61,8 +61,8 @@ public class JobTitlesController {
 		return this.jobTitleService.add(jobTitle);
 	}
 
-	@DeleteMapping("/delete/{id}")
-	public Result delete(@PathVariable int id) {
+	@DeleteMapping("/delete")
+	public Result delete(@RequestBody int id) {
 		return this.jobTitleService.delete(id);
 	}
 

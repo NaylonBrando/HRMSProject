@@ -7,7 +7,7 @@ import kodlamaio.hrms.core.ultilities.results.DataResult;
 import kodlamaio.hrms.core.ultilities.results.Result;
 import kodlamaio.hrms.entities.concrates.JobPosition;
 
-public interface JobTitleService {
+public interface JobPositionService {
 
 	Result add(JobPosition jobTitle);
 
@@ -19,6 +19,6 @@ public interface JobTitleService {
 
 	DataResult<Optional<JobPosition>> getById(int id);
 	
-	DataResult<JobPosition> getByName(String name);
+	DataResult<JobPosition> getByPositionName(String name);
 
 }
