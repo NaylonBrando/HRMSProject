@@ -8,5 +8,5 @@ public interface EmployerDao extends JpaRepository<Employer, Integer> {
 
 	Employer getByTaxNumber(String taxNumber);
 
-	Employer getByCompanyEmail(String companyEmail);
+	Employer getByEmail(String companyEmail);
 }

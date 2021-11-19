@@ -6,8 +6,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import kodlamaio.hrms.core.entities.concrate.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,17 +18,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@PrimaryKeyJoinColumn(name = "user_id", referencedColumnName = "id")
 @Table(name = "system_employees")
-public class SystemEmployee {
-
-	@Id
-	@GeneratedValue
-	@Column(name = "id")
-	private int id;
-
-	@Column(name = "user_id")
-	private int userId;
-
+public class SystemEmployee extends User {
+//departman falan ekelnecek
 	@Column(name = "first_name")
 	private int firstName;
 

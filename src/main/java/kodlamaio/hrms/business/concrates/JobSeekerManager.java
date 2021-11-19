@@ -1,16 +1,17 @@
 package kodlamaio.hrms.business.concrates;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kodlamaio.hrms.adapters.FakeMernisServiceAdapter;
 import kodlamaio.hrms.business.abstracts.JobSeekerService;
+import kodlamaio.hrms.core.adapters.abtracts.TurkishCitizenIdenityCheckService;
+import kodlamaio.hrms.core.adapters.concrates.MernisServiceAdapter;
 import kodlamaio.hrms.core.business.BusinessRules;
-import kodlamaio.hrms.core.ultilities.StringExtensions;
+import kodlamaio.hrms.core.business.abtracts.EmailActivationService;
+import kodlamaio.hrms.core.dtos.EmailActivationForVerifyDto;
+import kodlamaio.hrms.core.entities.concrate.TurkishCitizen;
 import kodlamaio.hrms.core.ultilities.results.DataResult;
 import kodlamaio.hrms.core.ultilities.results.ErrorResult;
 import kodlamaio.hrms.core.ultilities.results.Result;
@@ -18,38 +19,68 @@ import kodlamaio.hrms.core.ultilities.results.SuccessDataResult;
 import kodlamaio.hrms.core.ultilities.results.SuccessResult;
 import kodlamaio.hrms.dataAccess.abstracts.JobSeekerDao;
 import kodlamaio.hrms.entities.concrates.JobSeeker;
+import kodlamaio.hrms.entities.concrates.dtos.JobSeekerRegisterDto;
 
 @Service
 public class JobSeekerManager implements JobSeekerService {
 
-	JobSeekerDao jobSeekerDao;
+	private JobSeekerDao jobSeekerDao;
+	private TurkishCitizenIdenityCheckService turkishCitizenIdenityCheckService;
+	private EmailActivationService emailActivationService;
 
 	@Autowired
-	public JobSeekerManager(JobSeekerDao jobSeekerDao) {
+	public JobSeekerManager(JobSeekerDao jobSeekerDao,
+			TurkishCitizenIdenityCheckService turkishCitizenIdenityCheckService,
+			EmailActivationService emailActivationService) {
 		super();
 		this.jobSeekerDao = jobSeekerDao;
+		this.turkishCitizenIdenityCheckService = turkishCitizenIdenityCheckService;
+		this.emailActivationService = emailActivationService;
+
 	}
 
 	@Override
-	public Result add(JobSeeker jobSeeker) {
+	public Result add(JobSeekerRegisterDto jobSeekerRegisterDto) {
 
-		// Bunu BusinessRules'a refactor et
+		TurkishCitizen turkishCitizen = new TurkishCitizen();
+		turkishCitizen.setFirstName(jobSeekerRegisterDto.getFirstName());
+		turkishCitizen.setLastName(jobSeekerRegisterDto.getLastName());
+		turkishCitizen.setDateOfBirth(jobSeekerRegisterDto.getBirthDate().getYear());
+		turkishCitizen.setNationalityId(jobSeekerRegisterDto.getIdentificationNumber());
 
-		Result result = BusinessRules.Run(checkJobSeekerFieldsIsNullOrEmpty(jobSeeker),
-				checkIfEmailAdressExits(jobSeeker.getEmail()),
-				checkIfİdenityNumberExits(jobSeeker.getIdentificationNumber()), checkRealPerson(jobSeeker));
+		Result result = BusinessRules.Run(
+				passwordAndPassowrdRepeatCompare(jobSeekerRegisterDto.getPassword(),
+						jobSeekerRegisterDto.getRepeatPassword()),
+				checkIfEmailAdressExits(jobSeekerRegisterDto.getEmail()),
+				checkIfİdenityNumberExits(jobSeekerRegisterDto.getIdentificationNumber()),
+				checkRealPerson(turkishCitizen));
 
 		if (!result.isSuccess()) {
 			return result;
 		}
+
+		JobSeeker jobSeeker = new JobSeeker();
+		jobSeeker.setFirstName(jobSeekerRegisterDto.getFirstName());
+		jobSeeker.setLastName(jobSeekerRegisterDto.getLastName());
+		jobSeeker.setIdentificationNumber(jobSeekerRegisterDto.getIdentificationNumber());
+		jobSeeker.setEmail(jobSeekerRegisterDto.getEmail());
+		jobSeeker.setBirthDate(jobSeekerRegisterDto.getBirthDate());
+		jobSeeker.setPassword(jobSeekerRegisterDto.getPassword());
+		jobSeeker.setActivated(false);
+
 		jobSeekerDao.save(jobSeeker);
-		return new SuccessResult("İş arayan hesabı olusturuldu.");
+		// UserId, jobseeker vt'ye kaydedildikten sonra geliyor ilginc sekilde :)
+		emailActivationService.createAndSendActivationCodeByMail(jobSeeker);
+		return new SuccessResult("İş arayan hesabı olusturuldu. Epostanıza gelen doğrulama kodunu onaylayınız.");
 	}
 
 	@Override
-	public Result delete(JobSeeker jobSeeker) {
-		// TODO Auto-generated method stub
-		return null;
+	public Result deleteById(int id) {
+		if (jobSeekerDao.getById(id) == null) {
+			return new ErrorResult("Böyle bir is arayan bulunamadi.");
+		}
+		jobSeekerDao.deleteById(id);
+		return new SuccessResult("Basariyla silindi.");
 	}
 
 	@Override
@@ -58,18 +89,51 @@ public class JobSeekerManager implements JobSeekerService {
 		return null;
 	}
 
+	public Result verifyAccount(EmailActivationForVerifyDto emailActivationForVerifyDto) {
+		Result result = emailActivationService.verify(emailActivationForVerifyDto);
+		if (result.isSuccess() == true) {
+			JobSeeker jobSeeker = jobSeekerDao.getByEmail(emailActivationForVerifyDto.getEmail());
+			jobSeeker.setActivated(true);
+			jobSeekerDao.save(jobSeeker);
+
+			return result;
+		}
+		return result;
+	}
+
 	@Override
 	public DataResult<List<JobSeeker>> getAll() {
 		return new SuccessDataResult<List<JobSeeker>>(jobSeekerDao.findAll());
 	}
 
 	@Override
-	public DataResult<Optional<JobSeeker>> getById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+	public DataResult<JobSeeker> getById(int id) {
+		return new SuccessDataResult<JobSeeker>(jobSeekerDao.getById(id));
 	}
 
-	public Result checkIfEmailAdressExits(String email) {
+	@Override
+	public DataResult<JobSeeker> getByIdentificationNumber(String idenifacationNumber) {
+		return new SuccessDataResult<JobSeeker>(jobSeekerDao.getByIdentificationNumber(idenifacationNumber));
+	}
+
+	@Override
+	public DataResult<JobSeeker> getByEmail(String email) {
+		return new SuccessDataResult<JobSeeker>(jobSeekerDao.getByEmail(email));
+	}
+
+	private Result passwordAndPassowrdRepeatCompare(String password, String passwordRepeat) {
+
+		if (password.equals(passwordRepeat) == false) {
+
+			return new ErrorResult("Sifreler uyusmadi.");
+
+		} else {
+			return new SuccessResult();
+		}
+
+	}
+
+	private Result checkIfEmailAdressExits(String email) {
 
 		if (jobSeekerDao.getByEmail(email) != null) {
 
@@ -93,28 +157,9 @@ public class JobSeekerManager implements JobSeekerService {
 
 	}
 
-	private Result checkRealPerson(JobSeeker jobseeker) {
+	private Result checkRealPerson(TurkishCitizen turkishCitizen) {
 
-		FakeMernisServiceAdapter fakeServiceAdapter = new FakeMernisServiceAdapter();
-
-		if (!fakeServiceAdapter.checkRealPerson(jobseeker)) {
-			return new ErrorResult("Kimlik bilgileri hatalı");
-		}
-
-		return new SuccessResult();
-
-	}
-
-	private Result checkJobSeekerFieldsIsNullOrEmpty(JobSeeker jobseeker) {
-		if (StringExtensions.isNullOrEmpty(jobseeker.getEmail(), jobseeker.getFirstName(), jobseeker.getLastName(),
-				jobseeker.getIdentificationNumber(), 
-				String.valueOf(jobseeker.getBirthDate().getYear()))) {
-			return new ErrorResult("Bazı alan veya alanlar boş.");
-
-		}
-		else {
-			return new SuccessResult();
-		}
+		return turkishCitizenIdenityCheckService.checkCitizenIdenityInformation(turkishCitizen);
 
 	}
 

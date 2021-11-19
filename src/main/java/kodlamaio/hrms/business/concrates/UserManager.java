@@ -6,17 +6,27 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import kodlamaio.hrms.business.abstracts.UserService;
+import kodlamaio.hrms.core.dataAccess.UserDao;
 import kodlamaio.hrms.core.entities.concrate.User;
 import kodlamaio.hrms.core.ultilities.results.DataResult;
 import kodlamaio.hrms.core.ultilities.results.Result;
+import kodlamaio.hrms.core.ultilities.results.SuccessDataResult;
+import kodlamaio.hrms.core.ultilities.results.SuccessResult;
 
 @Service
 public class UserManager implements UserService {
 
+	UserDao userDao;
+
+	public UserManager(UserDao userDao) {
+		super();
+		this.userDao = userDao;
+	}
+
 	@Override
 	public Result add(User user) {
-		// TODO Auto-generated method stub
-		return null;
+		userDao.save(user);
+		return new SuccessResult();
 	}
 
 	@Override
@@ -33,14 +43,17 @@ public class UserManager implements UserService {
 
 	@Override
 	public DataResult<List<User>> getAll() {
-		// TODO Auto-generated method stub
-		return null;
+		return new SuccessDataResult<List<User>>(userDao.findAll());
 	}
 
 	@Override
-	public DataResult<Optional<User>> getById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+	public DataResult<User> getById(int id) {
+		return new SuccessDataResult<User>(userDao.getById(id));
+	}
+
+	@Override
+	public DataResult<User> getByEmail(String email) {
+		return new SuccessDataResult<User>(userDao.getByEmail(email));
 	}
 
 }

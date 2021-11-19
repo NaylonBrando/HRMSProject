@@ -22,48 +22,39 @@ import kodlamaio.hrms.entities.concrates.JobPosition;
 @RequestMapping("api/jobtitles")
 public class JobPositionsController {
 
-	private JobPositionService jobTitleService;
+	private JobPositionService jobPositionService;
 
 	@Autowired
 	public JobPositionsController(JobPositionService jobTitleService) {
 		super();
-		this.jobTitleService = jobTitleService;
+		this.jobPositionService = jobTitleService;
 	}
 
 	@GetMapping("getall")
 	public DataResult<List<JobPosition>> getAll() {
-		var result = jobTitleService.getAll();
-
-		if (result.isSuccess()) {
-			return result;
-		}
-
-		else {
-			return null;
-		}
-
+		return jobPositionService.getAll();
 	}
 
 	@GetMapping("/getbyid")
 	public DataResult<Optional<JobPosition>> getById(@RequestParam int id) {
-		return jobTitleService.getById(id);
+		return jobPositionService.getById(id);
 
 	}
 
 	@GetMapping("getbypositionname")
 	public DataResult<JobPosition> getByPositionName(@RequestParam String name) {
-		return jobTitleService.getByPositionName(name);
+		return jobPositionService.getByPositionName(name);
 
 	}
 
 	@PostMapping("/add")
 	public Result add(@RequestBody JobPosition jobTitle) {
-		return this.jobTitleService.add(jobTitle);
+		return this.jobPositionService.add(jobTitle);
 	}
 
 	@DeleteMapping("/delete")
 	public Result delete(@RequestBody int id) {
-		return this.jobTitleService.delete(id);
+		return this.jobPositionService.delete(id);
 	}
 
 }
