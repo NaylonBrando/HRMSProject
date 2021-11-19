@@ -17,6 +17,8 @@ public interface UserService {
 
 	DataResult<List<User>> getAll();
 
-	DataResult<Optional<User>> getById(int id);
+	DataResult<User> getById(int id);
+	
+	DataResult<User> getByEmail(String email);
 
 }

@@ -16,11 +16,11 @@ import kodlamaio.hrms.entities.concrates.JobAdvertisement;
 
 @RestController
 @RequestMapping("api/jobAdvertisements")
-public class JobAdvertisementController {
+public class JobAdvertisementsController {
 
 	private JobAdvertisementManager jobAdvertisementManager;
 
-	public JobAdvertisementController(JobAdvertisementManager jobAdvertisementManager) {
+	public JobAdvertisementsController(JobAdvertisementManager jobAdvertisementManager) {
 		super();
 		this.jobAdvertisementManager = jobAdvertisementManager;
 	}

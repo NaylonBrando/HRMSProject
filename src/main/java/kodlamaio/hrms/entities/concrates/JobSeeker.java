@@ -3,11 +3,11 @@ package kodlamaio.hrms.entities.concrates;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import kodlamaio.hrms.core.entities.concrate.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,15 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "jobseekers")
-public class JobSeeker {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private int id;
-
-	@Column(name = "user_id")
-	private int userId;
+@PrimaryKeyJoinColumn(name = "user_id", referencedColumnName = "id")
+public class JobSeeker extends User {
 
 	@Column(name = "first_name")
 	private String firstName;
@@ -38,8 +31,5 @@ public class JobSeeker {
 
 	@Column(name = "birth_date")
 	private LocalDate birthDate;
-
-	@Column(name = "email")
-	private String email;
 
 }
