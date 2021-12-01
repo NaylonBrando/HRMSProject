@@ -55,6 +55,7 @@ public class JobAdvertisement {
 	//       2000-10-31T01:30:00.000-05:00 -- yyyy-MM-dd'T'HH:mm:ss.SSSXXX
 	//Not2: yeni format örn 2000-10-31T01:30:00 ama sorun cıkarir mi.
 	//Kullanıma bakmak icin 
+	//neyse biz eski formata dönmüsüm :D  yyyy-MM-dd
 	//https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/format/annotation/DateTimeFormat.ISO.html
 	
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
